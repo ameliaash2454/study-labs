@@ -23,3 +23,15 @@ index="system_logs" | rename Event.System.EventID AS EventID  Event.EventData.* 
 
 ![](attachment/Pasted%20image%2020261111204953.png)
 Изучив связанные с ProcessGuid="747F3D96-3058-6095-AD04-000000001D00" действия вредоносной активности не обнаружено. 
+
+![](attachment/Pasted%20image%2020261111210226.png)
+ Далее мне кажется подозрительным запуск sysmon.exe из папки Temp.В норме эта утилита запускается из C:\Windows\sysmon.exe как на 3 строке.
+ index="system_logs"
+| spath
+| rename Event.System.EventID AS EventID Event.EventData.* AS *
+| *search image="Sysmon.exe"*
+| table UtcTime User IntegrityLevel ParentImage Image CommandLine ParentCommandLine ProcessGuid ParentProcessGuid
+| sort 0 UtcTime
+Посмотрю связанные процессы.
+![](attachment/Pasted%20image%2020261111210819.png)
+Нашла запуск cmd.exe sysmon.exe из папки Downloads/Sysmon
