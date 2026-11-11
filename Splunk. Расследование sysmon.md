@@ -20,3 +20,6 @@ index="system_logs" | rename Event.System.EventID AS EventID  Event.EventData.* 
 Разбираем по отдельности подозрительные процессы.
 
 Начну с C:\Windows\System32\CompPkgSrv.exe 
+
+![](attachment/Pasted%20image%2020261111204953.png)
+Изучив связанные с ProcessGuid="747F3D96-3058-6095-AD04-000000001D00" действия вредоносной активности не обнаружено. 
