@@ -35,3 +35,19 @@ index="system_logs" | rename Event.System.EventID AS EventID  Event.EventData.* 
 Посмотрю связанные процессы.
 ![](attachment/Pasted%20image%2020261111210819.png)
 Нашла запуск cmd.exe sysmon.exe из папки Downloads/Sysmon
+![](attachment/Pasted%20image%2020261111211306.png)
+index="system_logs"
+| spath
+| rename Event.System.EventID AS EventID Event.EventData.* AS *
+| search Image="*Sysmon.exe" ParentProcessGuid="747F3D96-302C-6095-9704-000000001D00"
+| table UtcTime User IntegrityLevel ParentImage Image CommandLine ParentCommandLine ProcessGuid ParentProcessGuid
+| sort 0 UtcTime  
+
+подставила его Guid как ParentProcessGuid чтобы найти дочерние процессы. C:\Users\IEUser\AppData\Local\Temp\Sysmon.exe - запуск данной программы.
+Исследуем что делал этот процесс. 
+index="system_logs"
+| spath
+| rename Event.System.EventID AS EventID Event.EventData.* AS *
+| search ProcessGuid="747F3D96-302C-6095-9704-000000001D00"
+| table UtcTime User IntegrityLevel ParentImage Image CommandLine ParentCommandLine ProcessGuid ParentProcessGuid
+| sort 0 UtcTime
