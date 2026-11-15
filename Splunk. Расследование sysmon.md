@@ -83,3 +83,5 @@ Event ID = 15.  FileCreateStreamHash (Создание файлового пот
 Проверю сетевые соединения.
 ![](attachment/Pasted%20image%2020261115211802.png)
 Соединение с 192.168.1.11:1234 
+![](attachment/Pasted%20image%2020261115214002.png)Запуск cmd.exe.
+
