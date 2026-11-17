@@ -55,3 +55,13 @@ cmd.exe выполнила команду cmd \c set comspec=C:\windows\temp\sup
 Алерты для данного инцидента
 
 1. Первый алерт я бы связала с загрузкой .hta, так как это потенциальная передача скрипта.
+
+index="system_logs"
+| spath
+| rename Event.System.EventID AS EventID Event.EventData.* AS *
+| search EventID=15 AND TargetFilename = "*.hta:Zone.Identifier"
+| sort 0 UtcTime
+
+С настройками алерта: проверка по расписанию каждый день, условие срабатывания Number of Results is greater than 0, add to triggered alerts
+
+2. 
