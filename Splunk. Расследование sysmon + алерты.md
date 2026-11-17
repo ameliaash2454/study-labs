@@ -87,3 +87,8 @@ index="system_logs"
 
 4. Использование JuicyPotato и расследование среды командами whoami, ipconfig
 Одиночный запуск `whoami` или `ipconfig` может быть легитимным действием администратора, но запуск нескольких разных утилит разведки подряд с одного хоста за короткое время  это почти гарантированный признак работы скрипта или злоумышленника.
+index="system_logs"
+| spath
+| rename Event.System.EventID AS EventID Event.EventData.* AS *
+| search EventID=1 AND (CommandLine="*whoami*" OR CommandLine="*systeminfo*" OR CommandLine="*net*" OR CommandLine="*net1*" OR CommandLine="*nltest*" OR CommandLine="*ipconfig*" OR CommandLine="*tasklist*" OR CommandLine="*quser*" OR CommandLine="*qwinsta*" OR CommandLine="*arp*" OR CommandLine="*route*" OR CommandLine="*netstat*" OR CommandLine="*nslookup*")
+Временной диапазон: расписание Earliest: -10m, Latest: now. Run every 5 minutes, Number of Results is greater than 0
