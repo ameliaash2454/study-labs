@@ -113,36 +113,55 @@ SHA256 исходного файла:
 | Действие     | Add to Triggered Alerts                        |
 | Повторы      | Throttle 10 минут по полям конкретного правила |
 **1. Получение файла `.hta`**
-
+Выявляет запуск PowerShell дочерним процессом mshta
 index="system_logs"  
 | spath  
 | rename Event.System.EventID AS EventID Event.EventData. _AS_  
 | search EventID=15 AND TargetFilename = "*.hta:Zone.Identifier"
 
-С настройками алерта: проверка по расписанию каждый день, условие срабатывания Number of Results is greater than 0, add to triggered alerts
+**2. Попытка изменения переменной COMSPEC через командную строку**
 
-2. иногда злоумышленники или вирусы используют конструкцию вроде `%COMSPEC% /c [команда]` или `%COMSPEC% /k ...` для скрытого или автоматического запуска вредоносных скриптов. Установим алерт на изменение параметров переменной. 
+Выявляет командную строку, содержащую присваивание COMSPEC пути к EXE во временном каталоге. Переопределение командного интерпретатора может использоваться для выполнения другого бинарника.
+
 index="system_logs"
 | spath
 | rename Event.System.EventID AS EventID Event.EventData.* AS *
-| search EventID=1 AND CommandLine="*set comspec*"
+| search EventID=1
+| regex CommandLine="(?i)\\bset\\s+\"?comspec\\s*="
 
-Условия запуска те же.
+**3. Большое количество исходящих соединений на 8080**
 
-3.  Подозрительным является большое количество исходящих tcp соединений особенно с портом 8080.
-index="system_logs"
-| spath
-| rename Event.System.EventID AS EventID Event.EventData.* AS *
-| search EventID=3 AND Protocol=tcp AND DestinationPort=8080
+Выявляет не менее 10 исходящих TCP-соединений к порту 8080 в одной календарной минуте от одинакового пути программы на одном хосте к одному адресу.
 
-В зависимости от того чем является целевая машина я бы поставила триггер срабатывания алерта после количества соединение на 50-100% больше обычной нагрузки и время расписания поставила на каждый час.
 
-4. Использование JuicyPotato и расследование среды командами whoami, ipconfig
+| search EventID=3 Protocol=tcp Initiated=true DestinationPort=8080
+| bin _time span=1m
+| stats count AS Connections
+        values(EventRecordID) AS EventRecordIDs
+        BY _time Computer Image DestinationIp DestinationPort
+| where Connections>=10
+
+**4. Разведка и возможное использование JuicyPotato**
 Одиночный запуск `whoami` или `ipconfig` может быть легитимным действием администратора, но запуск нескольких разных утилит разведки подряд с одного хоста за короткое время  это почти гарантированный признак работы скрипта или злоумышленника.
-index="system_logs"
-| spath
-| rename Event.System.EventID AS EventID Event.EventData.* AS *
-| search EventID=1 AND (CommandLine="*whoami*" OR CommandLine="*systeminfo*" OR CommandLine="*net*" OR CommandLine="*net1*" OR CommandLine="*nltest*" OR CommandLine="*ipconfig*" OR CommandLine="*tasklist*" OR CommandLine="*quser*" OR CommandLine="*qwinsta*" OR CommandLine="*arp*" OR CommandLine="*route*" OR CommandLine="*netstat*" OR CommandLine="*nslookup*")
-Временной диапазон: расписание Earliest: -10m, Latest: now. Run every 5 minutes, Number of Results is greater than 0
+
+| search EventID=1
+| rex field=CommandLine "(?i)\\b(?<Tool>whoami|systeminfo|netstat|net1|net|nltest|ipconfig|tasklist|quser|qwinsta|arp|route|nslookup)(?:[.]exe)?\\b"
+| eval Tool=lower(Tool)
+| eval Potato=if(
+    match(CommandLine,"(?i)\\b(juicypotato|juice|juicy)[.]exe\\b"),
+    1,0)
+| where isnotnull(Tool) OR Potato=1
+| stats dc(Tool) AS ToolCount
+        values(Tool) AS Tools
+        sum(Potato) AS PotatoMentions
+        values(EventRecordID) AS EventRecordIDs
+        BY Computer Image
+| where ToolCount>=2 OR PotatoMentions>0
+
+Алерт обнаружит:
+
+- минимум **две разные утилиты разведки** в командных строках одного исполняемого файла на одном компьютере за выбранный период;
+- либо упоминание `JuicyPotato.exe`, `juice.exe` или `juicy.exe`
 
 # Dashboard
+
