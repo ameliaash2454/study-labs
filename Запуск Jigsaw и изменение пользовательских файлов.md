@@ -79,29 +79,49 @@ SHA256 jingle_bells.exe и запущенного drpbx.exe
 
 3AE96F73D805E1D3995253DB4D910300D8442EA603737A1428B613061E7F61E7
 
+Для действующего инцидента рекомендуются следующие действия. 
 
-**Reconnaissance** Данных о разведке нет.
+Изолировать затронутый хост и остановить дальнейшую обработку файлов через согласованную процедуру реагирования. Сохранить дерево процессов, память и телеметрию.
+
+ Сохранить образец, оба EXE из AppData, значение Run и несколько пар исходных файлов и .fun. Проверить доступность резервных копий.
+
+ Проверить историю Telegram и загрузок для происхождения файла. После сбора доказательств устранить образец и закрепление, восстановить данные и проверить повторные входы.
+
+# Правила оповещений для данного инцидента
+
+|**Параметр**|**Для потока новых событий**|
+|---|---|
+|Тип алерта|Scheduled|
+|Cron|* * * * *  - каждую минуту|
+|Окно поиска|Earliest -6m@m, Latest -1m@m|
+|Условие|Number of Results is greater than 0|
+|Режим|For each result|
+|Действие|Add to Triggered Alerts|
+|Повторы|Throttle 10 минут по полям конкретного правила|
+
+1. Запуск образца с метаданными BitcoinBlackmailer
+Выявляет создание процесса с OriginalFileName BitcoinBlackmailer.exe
 index="smn_logs" source="*smn.json"
 | spath
-| search EventID=1
-| rename EventData_* AS * 
-| table UtcTime EventRecordID Computer User IntegrityLevel ParentImage Image
-    CommandLine ParentCommandLine ProcessGuid ParentProcessGuid
+| rename EventData_* AS *
+| search EventID=1 OriginalFileName="BitcoinBlackmailer.exe"
+| table UtcTime Computer EventRecordID User Image
+    ParentImage OriginalFileName Hashes ProcessGuid
 
-![](attachment/Pasted%20image%2020261119191829.png)
-EventID = 1 скачивание exe файла с телеграм веб приложения.
+2. Пять разных файлов fun за пять минут
+Выявляет создание или перезапись минимум пяти разных файлов с суффиксом .fun одним процессом за скользящие пять минут
 
-
-**Weaponization** **подготовка вредоносного файла** - создание вредоносной полезной нагрузки (payload) и её упаковка в доставляемый формат (например, заражённый документ, архив или исполняемый файл)
-Файл называется jinglebells.exe при этом EventData_OriginalFileName: BitcoinBlackmailer.exe
-
-**Delivery** **доставка** - файл получен через телеграм
-
-**Exploitation**  **запуск кода на хосте** - explorer запустил скрипт. 
-
-![](attachment/Pasted%20image%2020261119192959.png)
-![](attachment/Pasted%20image%2020261119193102.png)
-Запуск fondue.exe родительский процесс jingle_bells.exe  с командной строкой "C:\Windows\system32\fondue.exe" /enable-feature:NetFx3 /caller-name:mscoreei.dll -   Эта команда **запрашивает включение .NET Framework 3.5 в Windows** — среды, необходимой для работы некоторых программ
-
-
-**Installation****установка и закрепление**
+index="smn_logs" source="*smn.json"
+| spath
+| rename EventData_* AS *
+| search EventID=11 TargetFilename="*.fun"
+| eval _time=tonumber(UtcTime)
+| sort 0 _time
+| streamstats time_window=5m
+    dc(TargetFilename) AS file_count
+    values(EventRecordID) AS RecordIDs
+    BY Computer Image ProcessGuid
+| where file_count>=5
+| stats max(file_count) AS file_count
+    values(RecordIDs) AS RecordIDs
+    BY Computer Image ProcessGuid
