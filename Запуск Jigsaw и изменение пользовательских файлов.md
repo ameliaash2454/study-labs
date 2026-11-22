@@ -125,3 +125,5 @@ index="smn_logs" source="*smn.json"
 | stats max(file_count) AS file_count
     values(RecordIDs) AS RecordIDs
     BY Computer Image ProcessGuid
+
+# Дашборд
