@@ -126,4 +126,5 @@ index="smn_logs" source="*smn.json"
     values(RecordIDs) AS RecordIDs
     BY Computer Image ProcessGuid
 
-# Дашборд
+# Dashboard
+
