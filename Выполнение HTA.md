@@ -127,7 +127,7 @@ index="system_logs"
 | spath
 | rename Event.System.EventID AS EventID Event.EventData.* AS *
 | search EventID=1
-| regex CommandLine="(?i)\\bset\\s+\"?comspec\\s*="
+| regex CommandLine="(?i) \ \bset \ \s+ \ "?comspec \ \s*="
 
 **3. Большое количество исходящих соединений на 8080**
 
@@ -135,7 +135,7 @@ index="system_logs"
 
 
 | search EventID=3 Protocol=tcp Initiated=true DestinationPort=8080
-| bin _time span=1m
+| bin _ time span=1m
 | stats count AS Connections
         values(EventRecordID) AS EventRecordIDs
         BY _time Computer Image DestinationIp DestinationPort
@@ -164,4 +164,5 @@ index="system_logs"
 - либо упоминание `JuicyPotato.exe`, `juice.exe` или `juicy.exe`
 
 # Dashboard
+
 
