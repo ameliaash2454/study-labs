@@ -138,7 +138,7 @@ index="system_logs"
 | bin _ time span=1m
 | stats count AS Connections
         values(EventRecordID) AS EventRecordIDs
-        BY _time Computer Image DestinationIp DestinationPort
+        BY _ time Computer Image DestinationIp DestinationPort
 | where Connections>=10
 
 **4. Разведка и возможное использование JuicyPotato**
